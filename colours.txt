@@ -1,0 +1,6 @@
+B = Blue
+G = Green
+M = Mud
+O = Orange
+R = Red
+Y = Yellow
