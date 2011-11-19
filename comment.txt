@@ -1,0 +1,7 @@
+floodit.1.in: Level 1-8
+floodit.2.in: Level 1-9
+
+floodit.3.in: Flood (Small)
+floodit.4.in: Flood (Small)
+
+floodit.5.in: Random 16x16

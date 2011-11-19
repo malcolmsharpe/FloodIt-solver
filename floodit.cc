@@ -7,7 +7,7 @@ using namespace std;
 
 #define FOR(i,n) for(int i=0;i<n;++i)
 
-const int MAXR=12, MAXC=12;
+const int MAXR=16, MAXC=16;
 const int NBITS=MAXR*MAXC;
 
 int toidx(int r, int c) {
@@ -103,6 +103,7 @@ int heuristic_value(const bitset<NBITS> &dead) {
     FOR(u,NCOLOURS) if (maxdepth[u] >= d) ++c;
     ans = max(ans, c+d-1);
   }
+  assert(ans < inf);
   return ans;
 }
 
@@ -119,8 +120,13 @@ void dump_depth() {
 
 struct state {
   int moves;
+  int heuristic;
   string path;
   bitset<NBITS> dead;
+
+  int key() {
+    return moves + heuristic;
+  }
 };
 
 struct ltbitset {
@@ -152,14 +158,17 @@ int main() {
   state init;
   init.moves = 0;
   init.dead[toidx(0,0)] = 1;
+  compute_depth(init.dead);
+  init.heuristic = heuristic_value(init.dead);
 
-  int prevmoves = 0;
-  int heurdistr[32] = {}; // FIXME
+  int prevkey = 0;
+  int nstates = 0;
 
   set<bitset<NBITS>, ltbitset> mark;
   deque<state> q;
   q.push_back(init);
 
+  state nexts[NCOLOURS];
   while (q.size()) {
     state cur = q.front();
     q.pop_front();
@@ -167,17 +176,16 @@ int main() {
     if (mark.count(cur.dead)) continue;
     mark.insert(cur.dead);
 
-    if (cur.moves > prevmoves) {
-      prevmoves = cur.moves;
-      printf("  Moves = %2d, |q| = %d\n", cur.moves, (int)q.size());
-      FOR(h,32) if (heurdistr[h]) {
-	printf("    Heuristic value %2d:  %d\n", h, heurdistr[h]);
-      }
+    ++nstates;
 
-      memset(heurdistr, 0, sizeof(heurdistr));
+    if (cur.key() > prevkey) {
+      prevkey = cur.key();
+      printf("  Key = %2d, |q| = %d, nstates = %d\n", cur.key(), (int)q.size(),
+	nstates);
     }
 
     if (cur.dead == wanted) {
+      printf("Done. Searched %d states.\n", nstates);
       printf("%d\n", cur.moves);
       string path = cur.path;
       FOR(i,(int)path.size()) {
@@ -188,19 +196,22 @@ int main() {
     }
 
     compute_depth(cur.dead);
-    int heur = heuristic_value(cur.dead);
-    ++heurdistr[heur];
-
     FOR(u,NCOLOURS) {
-      state next = cur;
-      ++next.moves;
-      next.path.push_back(tocolour(u));
+      nexts[u] = cur;
+      ++nexts[u].moves;
+      nexts[u].path.push_back(tocolour(u));
 
       FOR(r,R) FOR(c,C) if (depth[r][c] == 1 && board[r][c] == u) {
-        next.dead[toidx(r,c)] = 1;
+        nexts[u].dead[toidx(r,c)] = 1;
       }
+    }
 
-      q.push_back(next);
+    FOR(u,NCOLOURS) {
+      compute_depth(nexts[u].dead);
+      nexts[u].heuristic = heuristic_value(init.dead);
+      if (nexts[u].key() == cur.key()+1) q.push_back(nexts[u]);
+      else if (nexts[u].key() == cur.key()) q.push_front(nexts[u]);
+      else assert(false);
     }
   }
 
