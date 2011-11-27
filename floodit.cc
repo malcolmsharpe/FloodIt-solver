@@ -130,6 +130,34 @@ struct state {
   }
 };
 
+struct TrieNode {
+  TrieNode *next[2];
+
+  TrieNode() {
+    memset(next, 0, sizeof(next));
+  }
+};
+
+struct BitsTrie {
+  TrieNode *root;
+
+  BitsTrie() : root(new TrieNode) {}
+
+  bool test_and_add(const bitset<NBITS> &s) {
+    bool found = 1;
+    TrieNode **pNode = &root;
+    FOR(i,NBITS) {
+      pNode = &(*pNode)->next[s[i]];
+
+      if (*pNode == 0) {
+        *pNode = new TrieNode;
+        found = 0;
+      }
+    }
+    return found;
+  }
+};
+
 bool subseteq(const bitset<NBITS> &s, const bitset<NBITS> &t) {
   return (s & (~t)).none();
 }

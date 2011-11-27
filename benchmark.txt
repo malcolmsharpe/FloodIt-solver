@@ -42,6 +42,11 @@ real	0m12.314s
 user	0m12.140s
 sys	0m0.089s
 
+With bits trie:
+real	0m28.418s
+user	0m12.835s
+sys	0m1.803s
+
 With subset pruning:
   Key = 20, |q| = 0, nstates = 1
   Key = 21, |q| = 299, nstates = 63
