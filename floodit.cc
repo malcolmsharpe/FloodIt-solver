@@ -58,7 +58,8 @@ void compute_depth(const bitset<NBITS> &dead) {
 
   FOR(r,R) FOR(c,C) depth[r][c] = inf;
 
-  deque<pair<int,int> > q;
+  static deque<pair<int,int> > q;
+  q.clear();
   q.push_back(make_pair(0,0));
   depth[0][0] = 0;
   while (q.size()) {

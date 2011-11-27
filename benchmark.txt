@@ -1,0 +1,46 @@
+time ./floodit < floodit.5.in
+
+
+Expected output:
+  Key = 20, |q| = 0, nstates = 1
+  Key = 21, |q| = 309, nstates = 65
+  Key = 22, |q| = 6263, nstates = 1317
+  Key = 23, |q| = 80698, nstates = 17192
+Done. Searched 68157 states.
+23
+YRMYGMOBGYOMRGYBMRGYMOB
+
+
+*** REMOTE
+
+
+A* initial attempt:
+56.89u 0.09s 0:57.18 99.6%
+
+
+With trying to explode fewer colours:
+59.13u 0.09s 0:59.37 99.7%
+
+
+
+*** LOCAL
+A* initial attempt:
+real	0m24.270s
+user	0m13.086s
+sys	0m0.469s
+
+With profiling on:
+real	0m47.718s
+user	0m25.397s
+sys	0m0.811s
+
+With static queue, profiling:
+real	0m24.109s
+user	0m23.955s
+sys	0m0.106s
+
+With static queue, no profiling:
+real	0m12.314s
+user	0m12.140s
+sys	0m0.089s
+
