@@ -59,3 +59,9 @@ YRMYGMOBGYOMRGYBMRGYMOB
 real	0m3.876s
 user	0m3.818s
 sys	0m0.017s
+
+
+With try_colour (only exploding reachable colours):
+real	0m3.812s
+user	0m3.666s
+sys	0m0.059s

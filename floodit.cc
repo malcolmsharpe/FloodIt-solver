@@ -185,6 +185,9 @@ int main() {
   int prevkey = 0;
   int nstates = 0;
 
+  int n_heur_incr = 0;
+  int npushed = 0;
+
   BitsTrie trie;
   vector<pair<bitset<NBITS>, int> > mark;
   deque<state> q;
@@ -217,7 +220,8 @@ int main() {
     }
 
     if (cur.dead == wanted) {
-      printf("Done. Searched %d states.\n", nstates);
+      printf("Done. Searched %d states; heur incr %d/%d pushed.\n",
+        nstates, n_heur_incr, npushed);
       printf("%d\n", cur.moves);
       string path = cur.path;
       FOR(i,(int)path.size()) {
@@ -228,7 +232,13 @@ int main() {
     }
 
     compute_depth(cur.dead);
-    FOR(u,NCOLOURS) {
+
+    bool try_colour[NCOLOURS] = {};
+    FOR(r,R) FOR(c,C) if (depth[r][c] == 1) {
+      try_colour[board[r][c]] = 1;
+    }
+
+    FOR(u,NCOLOURS) if (try_colour[u]) {
       nexts[u] = cur;
       ++nexts[u].moves;
       nexts[u].path.push_back(tocolour(u));
@@ -238,11 +248,16 @@ int main() {
       }
     }
 
-    FOR(u,NCOLOURS) {
+    FOR(u,NCOLOURS) if (try_colour[u]) {
       compute_depth(nexts[u].dead);
       nexts[u].heuristic = heuristic_value(init.dead);
-      if (nexts[u].key() == cur.key()+1) q.push_back(nexts[u]);
-      else if (nexts[u].key() == cur.key()) q.push_front(nexts[u]);
+      ++npushed;
+      if (nexts[u].key() == cur.key()+1) {
+        ++n_heur_incr;
+        q.push_back(nexts[u]);
+      } else if (nexts[u].key() == cur.key()) {
+        q.push_front(nexts[u]);
+      }
       else assert(false);
     }
   }
