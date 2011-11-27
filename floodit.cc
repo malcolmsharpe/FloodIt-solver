@@ -185,6 +185,7 @@ int main() {
   int prevkey = 0;
   int nstates = 0;
 
+  BitsTrie trie;
   vector<pair<bitset<NBITS>, int> > mark;
   deque<state> q;
   q.push_back(init);
@@ -193,6 +194,8 @@ int main() {
   while (q.size()) {
     state cur = q.front();
     q.pop_front();
+
+    if (trie.test_and_add(cur.dead)) continue;
 
     bool marked = 0;
     FOR(i,(int)mark.size()) {
