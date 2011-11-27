@@ -1,2 +1,2 @@
 %:%.cc
-	g++ -O -Wall $< -o $@
+	g++ -O -Wall -g $< -o $@

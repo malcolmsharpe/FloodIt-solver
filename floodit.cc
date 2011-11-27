@@ -130,17 +130,9 @@ struct state {
   }
 };
 
-struct ltbitset {
-  bool operator()(const bitset<NBITS> &s, const bitset<NBITS> &t) const {
-    // This is seriously ugly.
-    if (s == t) return false;
-    if (s.count() != t.count()) return s.count() < t.count();
-    FOR(i,NBITS) {
-      if (s[i] != t[i]) return s[i] < t[i];
-    }
-    return false;
-  }
-};
+bool subseteq(const bitset<NBITS> &s, const bitset<NBITS> &t) {
+  return (s & (~t)).none();
+}
 
 int main() {
   scanf(" %d%d",&R,&C);
@@ -165,7 +157,7 @@ int main() {
   int prevkey = 0;
   int nstates = 0;
 
-  set<bitset<NBITS>, ltbitset> mark;
+  vector<pair<bitset<NBITS>, int> > mark;
   deque<state> q;
   q.push_back(init);
 
@@ -174,8 +166,16 @@ int main() {
     state cur = q.front();
     q.pop_front();
 
-    if (mark.count(cur.dead)) continue;
-    mark.insert(cur.dead);
+    bool marked = 0;
+    FOR(i,(int)mark.size()) {
+      if (subseteq(cur.dead, mark[i].first) && mark[i].second <= cur.moves) {
+        marked = 1;
+        break;
+      }
+    }
+    if (marked) continue;
+
+    mark.push_back(make_pair(cur.dead, cur.moves));
 
     ++nstates;
 
