@@ -65,3 +65,37 @@ With try_colour (only exploding reachable colours):
 real	0m3.812s
 user	0m3.666s
 sys	0m0.059s
+
+
+With sort queue by descending moves (when at new key):
+real	0m1.347s
+user	0m1.317s
+sys	0m0.027s
+
+
+With sort queue by descending moves (using heap):
+  Key = 20, |q| = 0, nstates = 1
+  Key = 21, |q| = 170, nstates = 50
+  Key = 22, |q| = 1999, nstates = 584
+  Key = 23, |q| = 11830, nstates = 3649
+Done. Searched 3741 states; heur incr 14405/18103 pushed.
+23
+BRMRYMBGYOMBRGBRMYOBGMR
+
+real	0m0.879s
+user	0m0.855s
+sys	0m0.023s
+
+
+Additionally breaking ties by descending # dead:
+  Key = 20, |q| = 0, nstates = 1
+  Key = 21, |q| = 175, nstates = 51
+  Key = 22, |q| = 1799, nstates = 532
+  Key = 23, |q| = 9064, nstates = 2893
+Done. Searched 2993 states; heur incr 11469/14463 pushed.
+23
+BRMRYMBGYOMBRGYBORMBGYO
+
+real	0m0.692s
+user	0m0.670s
+sys	0m0.019s

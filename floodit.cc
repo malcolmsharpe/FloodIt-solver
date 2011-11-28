@@ -125,7 +125,7 @@ struct state {
   string path;
   bitset<NBITS> dead;
 
-  int key() {
+  int key() const {
     return moves + heuristic;
   }
 };
@@ -162,6 +162,12 @@ bool subseteq(const bitset<NBITS> &s, const bitset<NBITS> &t) {
   return (s & (~t)).none();
 }
 
+bool operator<(const state &a, const state &b) {
+  if (a.key() != b.key()) return a.key() > b.key();
+  if (a.moves != b.moves) return a.moves < b.moves;
+  return a.dead.count() < b.dead.count();
+}
+
 int main() {
   scanf(" %d%d",&R,&C);
 
@@ -190,13 +196,13 @@ int main() {
 
   BitsTrie trie;
   vector<pair<bitset<NBITS>, int> > mark;
-  deque<state> q;
-  q.push_back(init);
+  priority_queue<state> q;
+  q.push(init);
 
   state nexts[NCOLOURS];
   while (q.size()) {
-    state cur = q.front();
-    q.pop_front();
+    state cur = q.top();
+    q.pop();
 
     if (trie.test_and_add(cur.dead)) continue;
 
@@ -252,13 +258,8 @@ int main() {
       compute_depth(nexts[u].dead);
       nexts[u].heuristic = heuristic_value(init.dead);
       ++npushed;
-      if (nexts[u].key() == cur.key()+1) {
-        ++n_heur_incr;
-        q.push_back(nexts[u]);
-      } else if (nexts[u].key() == cur.key()) {
-        q.push_front(nexts[u]);
-      }
-      else assert(false);
+      if (nexts[u].key() == cur.key()+1) ++n_heur_incr;
+      q.push(nexts[u]);
     }
   }
 
