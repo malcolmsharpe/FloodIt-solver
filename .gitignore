@@ -1,0 +1,9 @@
+# Shark profiles.
+*.mshark
+
+# VIM swap files.
+*.swp
+
+# Output of compilation.
+floodit
+floodit.dSYM
