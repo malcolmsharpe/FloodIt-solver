@@ -1,5 +1,6 @@
-#include <cassert>
 #include <bitset>
+#include <cassert>
+#include <cstdio>
 #include <queue>
 #include <set>
 #include <string>
@@ -168,8 +169,57 @@ bool operator<(const state &a, const state &b) {
   return a.dead.count() < b.dead.count();
 }
 
+struct PeterStats {
+  int moves;
+  int est1k, est1p5k, est2k;
+  int loops;
+  int old;
+  string game_as_string;
+
+  PeterStats()
+    : moves(-1),
+      est1k(-1), est1p5k(-1), est2k(-1),
+      loops(-1), old(-1) {
+  }
+
+  void print() {
+    const char *fn = "floodit_peter_stats.csv";
+
+    FILE *f = fopen(fn, "r");
+    bool stats_file_exists = bool(f);
+    if (f) fclose(f);
+
+    f = fopen(fn, "a");
+
+    if (!stats_file_exists) {
+      fprintf(f, "\"Moves\",\"Est1K\",\"Est1.5K\",\"Est2K\",\"Loops\",\"Old\","
+                 "\"Game as String\"\n");
+    }
+
+    print_value(f, moves);
+    print_value(f, est1k);
+    print_value(f, est1p5k);
+    print_value(f, est2k);
+    print_value(f, loops);
+    print_value(f, old);
+    fprintf(f, "\"%s\"\n", game_as_string.c_str());
+
+    fclose(f);
+  }
+
+  void print_value(FILE *f, int value) {
+    if (value != -1) fprintf(f, "%d", value);
+    fprintf(f, ",");
+  }
+};
+
 int main() {
   scanf(" %d%d",&R,&C);
+
+  if (R > MAXR || C > MAXC) {
+    fprintf(stderr, "Dimensions %d x %d exceed maximum!\n", R, C);
+    exit(1);
+  }
 
   bitset<NBITS> wanted;
   FOR(r,R) {
@@ -193,6 +243,11 @@ int main() {
 
   int n_heur_incr = 0;
   int npushed = 0;
+  PeterStats ps;
+
+  FOR(r,R) FOR(c,C) {
+    ps.game_as_string.push_back('0' + board[r][c] + 1);
+  }
 
   BitsTrie trie;
   vector<pair<bitset<NBITS>, int> > mark;
@@ -219,6 +274,10 @@ int main() {
 
     ++nstates;
 
+    if (nstates == 1000) ps.est1k = cur.key();
+    if (nstates == 1500) ps.est1p5k = cur.key();
+    if (nstates == 2000) ps.est2k = cur.key();
+
     if (cur.key() > prevkey) {
       prevkey = cur.key();
       printf("  Key = %2d, |q| = %d, nstates = %d\n", cur.key(), (int)q.size(),
@@ -234,6 +293,11 @@ int main() {
         printf("%c", path[i]);
       }
       printf("\n");
+
+      ps.moves = cur.moves;
+      ps.loops = nstates;
+      ps.print();
+
       return 0;
     }
 
