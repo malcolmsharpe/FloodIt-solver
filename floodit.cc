@@ -124,6 +124,7 @@ struct state {
   int moves;
   int heuristic;
   string path;
+  vector<int> heur_path;
   bitset<NBITS> dead;
 
   int key() const {
@@ -289,8 +290,19 @@ int main() {
         nstates, n_heur_incr, npushed);
       printf("%d\n", cur.moves);
       string path = cur.path;
+      vector<int> heur_path = cur.heur_path;
       FOR(i,(int)path.size()) {
         printf("%c", path[i]);
+      }
+      printf("\n");
+
+      printf("\n");
+      FOR(i,(int)heur_path.size()) {
+        printf("%3d", heur_path[i]);
+      }
+      printf("\n");
+      FOR(i,(int)path.size()) {
+        printf("%3c", path[i]);
       }
       printf("\n");
 
@@ -312,6 +324,7 @@ int main() {
       nexts[u] = cur;
       ++nexts[u].moves;
       nexts[u].path.push_back(tocolour(u));
+      nexts[u].heur_path.push_back(cur.heuristic);
 
       FOR(r,R) FOR(c,C) if (depth[r][c] == 1 && board[r][c] == u) {
         nexts[u].dead[toidx(r,c)] = 1;

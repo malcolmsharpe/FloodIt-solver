@@ -1,0 +1,23 @@
+floodit.1.in:
+  14
+  ORYRMBGYMOYRGB
+
+floodit.2.in:
+  12
+  BRGYGYBYROMB
+
+floodit.3.in:
+  18
+  YOBGRBYGBRMOBRYOMG
+
+floodit.4.in:
+  18
+  YMRBMYOBGMORYMBROG
+
+floodit.5.in:
+  23
+  YRMYGMOBGYOMRGYBMRGYMOB
+
+floodit.6.in:
+  22
+  YOGMYRGBOMROGYORMBGYRO
