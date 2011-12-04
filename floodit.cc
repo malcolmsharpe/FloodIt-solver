@@ -88,7 +88,8 @@ void compute_depth(const bitset<NBITS> &dead) {
   }
 }
 
-int heuristic_value(const bitset<NBITS> &dead) {
+// Requires compute_depth to be called first.
+int old_heuristic_value(const bitset<NBITS> &dead) {
   int maxdepth[NCOLOURS] = {};
 
   FOR(r,R) FOR(c,C) if (!dead[toidx(r,c)]) {
@@ -109,6 +110,77 @@ int heuristic_value(const bitset<NBITS> &dead) {
   return ans;
 }
 
+int new_heuristic_value(const bitset<NBITS> &dead) {
+  bool killed[MAXR][MAXC] = {}, mark[MAXR][MAXC] = {};
+  int nondepth1[NCOLOURS] = {};
+  static vector<pair<int,int> > depth1[NCOLOURS];
+  FOR(u,NCOLOURS) depth1[u].clear();
+  static vector<pair<int,int> > q;
+  q.clear();
+
+  FOR(r,R) FOR(c,C) {
+    if (dead[toidx(r,c)]) {
+      mark[r][c] = 1;
+      q.push_back(make_pair(r,c));
+    } else {
+      ++nondepth1[board[r][c]];
+    }
+  }
+
+  int ans = -1;
+  while (1) {
+    FOR(u,NCOLOURS) if (depth1[u].size() && nondepth1[u] == 0) {
+      while (depth1[u].size()) {
+        q.push_back(depth1[u].back());
+        depth1[u].pop_back();
+      }
+      break;
+    }
+
+    if (!q.size()) {
+      FOR(u,NCOLOURS) {
+        while (depth1[u].size()) {
+          q.push_back(depth1[u].back());
+          depth1[u].pop_back();
+        }
+      }
+
+      if (!q.size()) break;
+    }
+
+    ++ans;
+
+    FOR(i,(int)q.size()) {
+      int r = q[i].first, c = q[i].second;
+      killed[r][c] = 1;
+    }
+
+    while (q.size()) {
+      int r = q.back().first, c = q.back().second;
+      q.pop_back();
+
+      FOR(i,D) {
+        int r2 = r+dr[i], c2 = c+dc[i];
+        if (r2<0 || r2>=R || c2<0 || c2>=C) continue;
+        
+        if (!mark[r2][c2] && (killed[r][c] || board[r2][c2] == board[r][c])) {
+          mark[r2][c2] = 1;
+          q.push_back(make_pair(r2,c2));
+
+          depth1[board[r2][c2]].push_back(make_pair(r2,c2));
+          --nondepth1[board[r2][c2]];
+        }
+      }
+    }
+  }
+
+  return ans;
+}
+
+int heuristic_value(const bitset<NBITS> &dead) {
+  return new_heuristic_value(dead);
+}
+
 void dump_depth() {
   printf("\n");
   FOR(r,R) {
@@ -125,6 +197,7 @@ struct state {
   int heuristic;
   string path;
   vector<int> heur_path;
+  int prev_seen_index;
   bitset<NBITS> dead;
 
   int key() const {
@@ -217,6 +290,18 @@ struct PeterStats {
   }
 };
 
+void dump_dead(const bitset<NBITS> &dead) {
+  FOR(r,R) {
+    FOR(c,C) {
+      char ch;
+      if (dead[toidx(r,c)]) ch = '.';
+      else ch = tocolour(board[r][c]);
+      printf("%c", ch);
+    }
+    printf("\n");
+  }
+}
+
 int main() {
   scanf(" %d%d",&R,&C);
 
@@ -241,6 +326,7 @@ int main() {
   init.dead[toidx(0,0)] = 1;
   compute_depth(init.dead);
   init.heuristic = heuristic_value(init.dead);
+  init.prev_seen_index = -1;
 
   int prevkey = 0;
   int nstates = 0;
@@ -255,6 +341,7 @@ int main() {
 
   BitsTrie trie;
   vector<pair<bitset<NBITS>, int> > mark;
+  vector<state> seen;
   priority_queue<state> q;
   q.push(init);
 
@@ -275,6 +362,7 @@ int main() {
     if (marked) continue;
 
     mark.push_back(make_pair(cur.dead, cur.moves));
+    seen.push_back(cur);
 
     ++nstates;
 
@@ -309,6 +397,26 @@ int main() {
       }
       printf("\n");
 
+      if (0) {
+        // Print state history.
+        state hist = cur;
+        while (1) {
+          printf("\n");
+
+          compute_depth(hist.dead);
+          int old_heur = old_heuristic_value(hist.dead);
+          int new_heur = new_heuristic_value(hist.dead);
+
+          printf("Old heuristic = %d\n", old_heur);
+          printf("New heuristic = %d\n", new_heur);
+
+          dump_dead(hist.dead);
+          if (hist.prev_seen_index == -1) break;
+          hist = seen[hist.prev_seen_index];
+        }
+      }
+
+      // Peter stats.
       ps.moves = cur.moves;
       ps.loops = nstates;
       ps.print();
@@ -328,6 +436,7 @@ int main() {
       ++nexts[u].moves;
       nexts[u].path.push_back(tocolour(u));
       nexts[u].heur_path.push_back(cur.heuristic);
+      nexts[u].prev_seen_index = int(seen.size()) - 1;
 
       FOR(r,R) FOR(c,C) if (depth[r][c] == 1 && board[r][c] == u) {
         nexts[u].dead[toidx(r,c)] = 1;
@@ -336,7 +445,7 @@ int main() {
 
     FOR(u,NCOLOURS) if (try_colour[u]) {
       compute_depth(nexts[u].dead);
-      nexts[u].heuristic = heuristic_value(init.dead);
+      nexts[u].heuristic = heuristic_value(nexts[u].dead);
       ++npushed;
       if (nexts[u].key() == cur.key()+1) ++n_heur_incr;
       q.push(nexts[u]);

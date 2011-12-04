@@ -116,3 +116,21 @@ BRMRYMBGYOMBRGYBORMBGYO
 real	0m0.731s
 user	0m0.682s
 sys	0m0.021s
+
+
+
+New heuristic:
+  Key = 20, |q| = 0, nstates = 1
+  Key = 21, |q| = 125, nstates = 38
+  Key = 22, |q| = 1396, nstates = 415
+  Key = 23, |q| = 6888, nstates = 2228
+Done. Searched 2246 states; heur incr 8467/10806 pushed.
+23
+BRMRYOBGYOMBRGYBORMBGYO
+
+ 20 19 18 17 16 15 14 13 12 12 11 11 10  9  8  8  7  6  5  4  3  2  1
+  B  R  M  R  Y  O  B  G  Y  O  M  B  R  G  Y  B  O  R  M  B  G  Y  O
+
+real	0m0.790s
+user	0m0.771s
+sys	0m0.017s
