@@ -134,3 +134,10 @@ BRMRYOBGYOMBRGYBORMBGYO
 real	0m0.790s
 user	0m0.771s
 sys	0m0.017s
+
+
+
+With no longer computing depth unnecessarily:
+real	0m0.561s
+user	0m0.541s
+sys	0m0.018s

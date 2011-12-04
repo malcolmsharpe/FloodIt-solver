@@ -88,8 +88,9 @@ void compute_depth(const bitset<NBITS> &dead) {
   }
 }
 
-// Requires compute_depth to be called first.
 int old_heuristic_value(const bitset<NBITS> &dead) {
+  compute_depth(dead);
+
   int maxdepth[NCOLOURS] = {};
 
   FOR(r,R) FOR(c,C) if (!dead[toidx(r,c)]) {
@@ -111,6 +112,12 @@ int old_heuristic_value(const bitset<NBITS> &dead) {
 }
 
 int new_heuristic_value(const bitset<NBITS> &dead) {
+  // killed: all dead squares in the simulation
+  // mark: all squares either dead or in a depth1 list
+  // depth1: for each colour, a list of its depth1 squares
+  // nondepth1: for each colour, how many squares not at depth1
+  // q: queue for flood fill (actually a stack)
+
   bool killed[MAXR][MAXC] = {}, mark[MAXR][MAXC] = {};
   int nondepth1[NCOLOURS] = {};
   static vector<pair<int,int> > depth1[NCOLOURS];
@@ -118,6 +125,7 @@ int new_heuristic_value(const bitset<NBITS> &dead) {
   static vector<pair<int,int> > q;
   q.clear();
 
+  // Initially, fill q with clear squares.
   FOR(r,R) FOR(c,C) {
     if (dead[toidx(r,c)]) {
       mark[r][c] = 1;
@@ -129,6 +137,8 @@ int new_heuristic_value(const bitset<NBITS> &dead) {
 
   int ans = -1;
   while (1) {
+    // If there is a colour with only depth-1 clumps, we will kill only that
+    // colour.
     FOR(u,NCOLOURS) if (depth1[u].size() && nondepth1[u] == 0) {
       while (depth1[u].size()) {
         q.push_back(depth1[u].back());
@@ -137,6 +147,9 @@ int new_heuristic_value(const bitset<NBITS> &dead) {
       break;
     }
 
+    // q is empty here if either this is not the first iteration (so the clear
+    // squares aren't in q) and every colour has some clumps above depth 1.
+    // In this case, we kill all clumps at depth 1.
     if (!q.size()) {
       FOR(u,NCOLOURS) {
         while (depth1[u].size()) {
@@ -150,6 +163,9 @@ int new_heuristic_value(const bitset<NBITS> &dead) {
 
     ++ans;
 
+    // Kill every square in q. By doing this here, when propagating later in
+    // the flood fill, we can recognize whether we're propagating from a
+    // newly-killed square or a square of equal colour.
     FOR(i,(int)q.size()) {
       int r = q[i].first, c = q[i].second;
       killed[r][c] = 1;
@@ -163,6 +179,12 @@ int new_heuristic_value(const bitset<NBITS> &dead) {
         int r2 = r+dr[i], c2 = c+dc[i];
         if (r2<0 || r2>=R || c2<0 || c2>=C) continue;
         
+        // We propagate to squares we haven't marked yet so that we only
+        // update depth1 and nondepth1 once. Propagation occurs when either
+        // we're propagating from a newly-killed square (so (r2,c2) is newly
+        // bordering a clear square) or we're propagating from a square of the
+        // same colour (so (r2,c2) is in the same clump as (r,c) and thus is
+        // also now at depth 1).
         if (!mark[r2][c2] && (killed[r][c] || board[r2][c2] == board[r][c])) {
           mark[r2][c2] = 1;
           q.push_back(make_pair(r2,c2));
@@ -324,7 +346,6 @@ int main() {
   state init;
   init.moves = 0;
   init.dead[toidx(0,0)] = 1;
-  compute_depth(init.dead);
   init.heuristic = heuristic_value(init.dead);
   init.prev_seen_index = -1;
 
@@ -403,7 +424,6 @@ int main() {
         while (1) {
           printf("\n");
 
-          compute_depth(hist.dead);
           int old_heur = old_heuristic_value(hist.dead);
           int new_heur = new_heuristic_value(hist.dead);
 
@@ -444,7 +464,6 @@ int main() {
     }
 
     FOR(u,NCOLOURS) if (try_colour[u]) {
-      compute_depth(nexts[u].dead);
       nexts[u].heuristic = heuristic_value(nexts[u].dead);
       ++npushed;
       if (nexts[u].key() == cur.key()+1) ++n_heur_incr;
