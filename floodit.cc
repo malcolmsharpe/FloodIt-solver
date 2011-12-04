@@ -166,7 +166,10 @@ bool subseteq(const bitset<NBITS> &s, const bitset<NBITS> &t) {
 
 bool operator<(const state &a, const state &b) {
   if (a.key() != b.key()) return a.key() > b.key();
-  if (a.moves != b.moves) return a.moves < b.moves;
+
+  // To break ties in the A* heap, observe that the subset optimization benefits
+  // from having already visited many states with few gems, so that we are more
+  // likely to prune.
   return a.dead.count() < b.dead.count();
 }
 

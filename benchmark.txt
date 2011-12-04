@@ -99,3 +99,20 @@ BRMRYMBGYOMBRGYBORMBGYO
 real	0m0.692s
 user	0m0.670s
 sys	0m0.019s
+
+
+Breaking ties by descending # dead only:
+  Key = 20, |q| = 0, nstates = 1
+  Key = 21, |q| = 175, nstates = 51
+  Key = 22, |q| = 1770, nstates = 524
+  Key = 23, |q| = 8998, nstates = 2866
+Done. Searched 2922 states; heur incr 11165/14129 pushed.
+23
+BRMRYMBGYOMBRGYBORMBGYO
+
+ 20 19 18 17 16 15 14 13 12 11 10 10  9  8  8  8  7  6  5  4  3  2  1
+  B  R  M  R  Y  M  B  G  Y  O  M  B  R  G  Y  B  O  R  M  B  G  Y  O
+
+real	0m0.731s
+user	0m0.682s
+sys	0m0.021s
