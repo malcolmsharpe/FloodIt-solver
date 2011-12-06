@@ -227,34 +227,6 @@ struct state {
   }
 };
 
-struct TrieNode {
-  TrieNode *next[2];
-
-  TrieNode() {
-    memset(next, 0, sizeof(next));
-  }
-};
-
-struct BitsTrie {
-  TrieNode *root;
-
-  BitsTrie() : root(new TrieNode) {}
-
-  bool test_and_add(const bitset<NBITS> &s) {
-    bool found = 1;
-    TrieNode **pNode = &root;
-    FOR(i,NBITS) {
-      pNode = &(*pNode)->next[s[i]];
-
-      if (*pNode == 0) {
-        *pNode = new TrieNode;
-        found = 0;
-      }
-    }
-    return found;
-  }
-};
-
 bool subseteq(const bitset<NBITS> &s, const bitset<NBITS> &t) {
   return (s & (~t)).none();
 }
@@ -363,7 +335,6 @@ int main() {
     ps.game_as_string.push_back('0' + board[r][c] + 1);
   }
 
-  BitsTrie trie;
   vector<pair<bitset<NBITS>, int> > mark;
   vector<state> seen;
   priority_queue<state> q;
@@ -374,11 +345,9 @@ int main() {
     state cur = q.top();
     q.pop();
 
-    if (trie.test_and_add(cur.dead)) continue;
-
     bool marked = 0;
     FOR(i,(int)mark.size()) {
-      if (subseteq(cur.dead, mark[i].first) && mark[i].second <= cur.moves) {
+      if (mark[i].second <= cur.moves && subseteq(cur.dead, mark[i].first)) {
         marked = 1;
         break;
       }

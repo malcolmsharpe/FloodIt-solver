@@ -141,3 +141,15 @@ With no longer computing depth unnecessarily:
 real	0m0.561s
 user	0m0.541s
 sys	0m0.018s
+
+
+With no trie:
+real	0m0.510s
+user	0m0.492s
+sys	0m0.007s
+
+
+With subseteq call re-ordered:
+real	0m0.472s
+user	0m0.451s
+sys	0m0.007s
