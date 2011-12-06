@@ -324,6 +324,8 @@ void dump_dead(const bitset<NBITS> &dead) {
   }
 }
 
+const int PRINT_STATE_HISTORY = 0;
+
 int main() {
   scanf(" %d%d",&R,&C);
 
@@ -355,6 +357,7 @@ int main() {
   int n_heur_incr = 0;
   int npushed = 0;
   PeterStats ps;
+  int colour_preference[NCOLOURS] = {};
 
   FOR(r,R) FOR(c,C) {
     ps.game_as_string.push_back('0' + board[r][c] + 1);
@@ -392,10 +395,24 @@ int main() {
     if (nstates == 2000) ps.est2k = cur.key();
 
     if (cur.key() > prevkey) {
+      string pref_str;
+      pref_str += "[";
+      FOR(u,NCOLOURS) {
+        if (u) pref_str += ", ";
+        pref_str += tocolour(u);
+        pref_str += ": ";
+
+        char buf[128];
+        sprintf(buf, "%d", colour_preference[u]);
+        pref_str += buf;
+      }
+      pref_str += "]";
+
       prevkey = cur.key();
-      printf("  Key = %2d, |q| = %d, nstates = %d\n", cur.key(), (int)q.size(),
-	nstates);
+      printf("  Key = %2d, |q| = %d, nstates = %d, pref_str = %s\n",
+        cur.key(), (int)q.size(), nstates, pref_str.c_str());
     }
+    if (cur.path.size()) ++colour_preference[fromcolour(cur.path[0])];
 
     if (cur.dead == wanted) {
       printf("Done. Searched %d states; heur incr %d/%d pushed.\n",
@@ -418,9 +435,10 @@ int main() {
       }
       printf("\n");
 
-      if (0) {
+      if (PRINT_STATE_HISTORY) {
         // Print state history.
         state hist = cur;
+        int actual = 0;
         while (1) {
           printf("\n");
 
@@ -429,10 +447,12 @@ int main() {
 
           printf("Old heuristic = %d\n", old_heur);
           printf("New heuristic = %d\n", new_heur);
+          printf("Actual        = %d\n", actual);
 
           dump_dead(hist.dead);
           if (hist.prev_seen_index == -1) break;
           hist = seen[hist.prev_seen_index];
+          ++actual;
         }
       }
 
