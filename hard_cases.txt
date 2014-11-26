@@ -1,0 +1,33 @@
+Some simple cases where the easy-to-compute heuristic does not match optimal value.
+(The input format might be wrong.)
+
+Depth-2:
+
+....BGR
+....BBB
+.......
+RRR.GGG
+BGR.GBR
+
+opt = 5
+heur
+  0 3
+  1 4
+  2 3
+
+
+Just 2 clumps:
+
+RGR.BGR
+
+opt = 4
+heur
+  0 3
+  1 3
+  2 3
+  3 3
+
+
+Note: 3 colours really are necessary for these examples, because the heuristic always matches the
+optimal value for just 2 colours. TODO: Actually prove this. Should be easy because 2-colour
+solutions are always alternating.
